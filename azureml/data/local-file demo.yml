@@ -1,0 +1,5 @@
+$schema: https://azuremlschemas.azureedge.net/latest/data.schema.json
+name: <enter-data-asset-name>
+description: <enter-data-asset-description>
+type: uri_file
+path: <enter-file-path>

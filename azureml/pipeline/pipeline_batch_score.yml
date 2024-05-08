@@ -1,0 +1,59 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+
+display_name: titanic-batch-prediction-using-parallel
+description: Titanic  batch prediction pipeline job
+experiment_name: titanic-batch-prediction-job
+
+
+settings:
+  default_compute: azureml:cpu-cluster
+
+
+jobs:
+  batch_prediction:
+    type: parallel
+    compute: azureml:cpu-cluster
+    inputs:
+      input_data: 
+        type: uri_folder
+        path: azureml:unlabelled-titanic-data:2
+        
+      score_model: 
+        type: mlflow_model
+        path: azureml:titanic_model:2
+        
+    outputs:
+      job_output_file:
+        type: uri_file
+        path: azureml://datastores/${{default_datastore}}/paths/titanic-custom-batch/predictions.csv
+        mode: rw_mount
+
+    input_data: ${{inputs.input_data}}
+    mini_batch_size: "10kb"
+    resources:
+        instance_count: 2
+    max_concurrency_per_instance: 2
+
+    logging_level: "DEBUG"
+    error_threshold: 5
+    mini_batch_error_threshold: 5
+    retry_settings:
+      max_retries: 2
+      timeout: 60
+    
+    task:
+      type: run_function
+      code: "../components/predict/"
+      entry_script: prediction.py
+      environment:  azureml:batch-mlflow-env@latest
+      program_arguments: >-
+        --model ${{inputs.score_model}}
+        --allowed_failed_percent 30
+        --task_overhead_timeout 1200
+        --progress_update_timeout 600
+        --first_task_creation_timeout 600
+        --resource_monitor_interval 20
+      append_row_to: ${{outputs.job_output_file}}
+  
+

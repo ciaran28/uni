@@ -1,0 +1,23 @@
+$schema: https://azuremlschemas.azureedge.net/latest/modelBatchDeployment.schema.json
+endpoint_name: <endpoint-name-to-deploy> #titanic-batch-prediction
+name: <enter-deployment-name> #titanic-custom-prediction
+description:  <enter-deployment-description> #titanic survivor prediction based on randomforest classifier
+type: model
+model: <azureml-registered-model-name> #azureml:titanic_model@latest
+environment: <azureml-env-name> #azureml:batch-mlflow-env@latest
+code_configuration:
+  code: <path-to-custom-script-file> #code 
+  scoring_script: <script-file-name> #batch_driver.py
+compute: <azureml-compute-to-deploy-model> #azureml:cpu-cluster
+resources:
+  instance_count: 2
+settings:
+  max_concurrency_per_instance: 2
+  mini_batch_size: 2
+  output_action: append_row
+  output_file_name: predictions.csv
+  retry_settings:
+    max_retries: 3
+    timeout: 300
+  error_threshold: -1
+  logging_level: info

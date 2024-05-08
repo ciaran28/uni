@@ -1,0 +1,12 @@
+$schema: https://azuremlschemas.azureedge.net/latest/amlCompute.schema.json
+type: amlcompute
+#enter name for the compute
+name: <enter-cluster-name>
+#enter VM size
+size: STANDARD_DS3_v2
+#enter minimum number of instances
+min_instances: 0
+#enter maximum number of instances
+max_instances: 10
+#enter idle time in seconds
+idle_time_before_scale_down: 360

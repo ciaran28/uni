@@ -1,0 +1,82 @@
+$schema: https://azuremlschemas.azureedge.net/latest/pipelineJob.schema.json
+type: pipeline
+
+description: <enter-pipeline-description> #Training piple line using Random Forest Classifier
+
+display_name: <pipeline-name> #pipeline-with-classifier
+experiment_name: <experiment-name> #titanic-classification
+
+inputs:
+  training_data:
+    type: uri_file
+    path: <azure-data-asset-name> #azureml:titanic-clean-data:2
+  test_data:
+    type: uri_file
+    path: <azure-data-asset-name> #azureml:titanic-test-clean-data:1
+outputs: 
+  # name of the output folders to save/store the outputs
+  predictions_folder:
+    type: uri_folder
+  model_info_path:
+    type: uri_folder
+
+
+jobs:
+  train_model:
+    inputs:
+      training_data: <training-data-path> #${{parent.inputs.training_data}}
+      target_column_name: <target-column-name> #'Survived'
+
+    outputs:
+      model_info_path: <output-path> #${{parent.outputs.model_info_path}}
+
+    environment: <azureml-env-name> #azureml:titanic-env:1
+    compute: <azureml-compute-name> #cpu-cluster
+    code: <path-to-script-file> #../components/training/
+    # enter name of the script file and input/output parameters
+    command: >-
+      python train.py
+      --training_data ${{inputs.training_data}}
+      --target_column_name ${{inputs.target_column_name}}
+      --model_info_path ${{outputs.model_info_path}}
+      
+  evaluate_model:
+    inputs:
+      test_data: <test-data-path> # ${{parent.inputs.test_data}}
+      target_column_name: <target-column-name> #'Survived'
+      model_info_path: <output-from-train-job> #${{parent.jobs.train_model.outputs.model_info_path}}
+    outputs:
+      predictions_folder: <output-path> #${{parent.outputs.predictions_folder}}
+      #model output path
+      model_path:
+        type: uri_folder
+        mode: upload
+
+    environment: <azureml-env-name> #azureml:titanic-env:1
+    compute: <azureml-compute> #cpu-cluster           
+    code: <path-to-script-file> #../components/evaluate/
+    #name of script file and input/output parameters
+    command: >-
+      python evaluate.py
+      --test_data ${{inputs.test_data}}
+      --model_info_path ${{inputs.model_info_path}}
+      --target_column_name ${{inputs.target_column_name}}
+      --predictions_path ${{outputs.predictions_folder}}
+      --model_path ${{outputs.model_path}}
+
+
+
+  register_model:
+    inputs:
+      model_name: <model-name-to register> #'titanic_model'
+      model_info_path: <model-details-inputs-train-job> #${{parent.jobs.train_model.outputs.model_info_path}}
+
+    environment: <azureml-env> #azureml:AzureML-sklearn-1.0-ubuntu20.04-py38-cpu:1
+    compute: <azureml-compute> #cpu-cluster
+    code: <path-to-script-file> # ../components/register/
+    #enter script file name & script input/output parameters
+    command: >-
+      python register.py
+      --model_info_path ${{inputs.model_info_path}}
+      --model_name ${{inputs.model_name}}   
+

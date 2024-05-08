@@ -1,0 +1,4 @@
+$schema: https://azuremlschemas.azureedge.net/latest/batchEndpoint.schema.json
+name: <enter-batch-endpoint-name> #titanic-batch-prediction
+description: <enter-endpoint-description> #A titanic classifier for batch inference
+auth_mode:  aad_token

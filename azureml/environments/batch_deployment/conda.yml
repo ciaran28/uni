@@ -1,0 +1,18 @@
+channels:
+- conda-forge
+dependencies:
+- python=3.8.18
+- pip<=21.2.4
+- pip:
+  - mlflow==2.10.1
+  - cloudpickle==2.2.1
+  - importlib-metadata==7.0.1
+  - numpy==1.22.0
+  - packaging==23.2
+  - psutil==5.9.8
+  - pyyaml==6.0.1
+  - scikit-learn==0.24.2
+  - scipy==1.7.1
+  - azureml-core
+  - azureml-dataset-runtime[fuse]
+name: mlflow-env

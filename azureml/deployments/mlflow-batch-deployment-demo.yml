@@ -1,0 +1,19 @@
+$schema: https://azuremlschemas.azureedge.net/latest/modelBatchDeployment.schema.json
+endpoint_name: <end-point-name> 
+name: <enter-deployment-name>
+description: <enter-deployment-description>
+type: model
+model: <azureml-registered-model> #azureml:titanic_model@latest
+compute: <azureml-compute-to deploy> #azureml:cpu-cluster
+resources:
+  instance_count: 2
+settings:
+  max_concurrency_per_instance: 2
+  mini_batch_size: 2
+  output_action: append_row
+  output_file_name: predictions.csv
+  retry_settings:
+    max_retries: 3
+    timeout: 300
+  error_threshold: -1
+  logging_level: info
